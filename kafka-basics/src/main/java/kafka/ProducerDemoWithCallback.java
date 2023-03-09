@@ -1,17 +1,15 @@
 package kafka;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-public class ProducerDemo {
+public class ProducerDemoWithCallback {
 
-    private static final Logger log = LoggerFactory.getLogger(ProducerDemo.class.getSimpleName());
+    private static final Logger log = LoggerFactory.getLogger(ProducerDemoWithCallback.class.getSimpleName());
 
     public static void main(String[] args) {
         log.info("I am a Kafka Producer");
@@ -29,8 +27,24 @@ public class ProducerDemo {
         ProducerRecord<String, String> producerRecord =
                 new ProducerRecord<>("demo_java", "hello world");
 
+
         // send the data — asynchronous
-        producer.send(producerRecord);
+        producer.send(producerRecord, (metadata, e) -> {
+            // executes every time a record is successfully sent, or an exception is thrown.
+            if (e == null) {
+                // the record was successfully sent
+                String str = """
+                        Received new metadata:
+                        Topic: %s
+                        Partition: %s
+                        Offset: %s
+                        Timestamp: %s
+                        """;
+                log.info(String.format(str, metadata.topic(), metadata.partition(), metadata.offset(), metadata.timestamp()));
+            } else {
+                log.error("Error while producing", e);
+            }
+        });
 
         // flush the data — synchronous
         producer.flush();
