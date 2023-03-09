@@ -23,28 +23,29 @@ public class ProducerDemoWithCallback {
         // create the Producer
         KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
 
-        // create a producer record
-        ProducerRecord<String, String> producerRecord =
-                new ProducerRecord<>("demo_java", "hello world");
+        for (int i = 0; i < 10; i++) {
+            // create a producer record
+            ProducerRecord<String, String> producerRecord =
+                    new ProducerRecord<>("demo_java", "hello world " + i);
 
-
-        // send the data — asynchronous
-        producer.send(producerRecord, (metadata, e) -> {
-            // executes every time a record is successfully sent, or an exception is thrown.
-            if (e == null) {
-                // the record was successfully sent
-                String str = """
+            // send the data — asynchronous
+            producer.send(producerRecord, (metadata, e) -> {
+                // executes every time a record is successfully sent, or an exception is thrown.
+                if (e == null) {
+                    // the record was successfully sent
+                    String str = """
                         Received new metadata:
                         Topic: %s
                         Partition: %s
                         Offset: %s
                         Timestamp: %s
                         """;
-                log.info(String.format(str, metadata.topic(), metadata.partition(), metadata.offset(), metadata.timestamp()));
-            } else {
-                log.error("Error while producing", e);
-            }
-        });
+                    log.info(String.format(str, metadata.topic(), metadata.partition(), metadata.offset(), metadata.timestamp()));
+                } else {
+                    log.error("Error while producing", e);
+                }
+            });
+        }
 
         // flush the data — synchronous
         producer.flush();
