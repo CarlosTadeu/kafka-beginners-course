@@ -13,6 +13,15 @@ public class ProducerDemoKeys {
 
     private static final Logger log = LoggerFactory.getLogger(ProducerDemoKeys.class.getSimpleName());
 
+    public static final String STR = """
+            Received new metadata:
+            Topic: %s
+            Key: %s
+            Partition: %s
+            Offset: %s
+            Timestamp: %s
+            """;
+
     public static void main(String[] args) {
         // create Producer Properties
         Properties properties = new Properties();
@@ -38,15 +47,7 @@ public class ProducerDemoKeys {
                 // executes every time a record is successfully sent, or an exception is thrown.
                 if (e == null) {
                     // the record was successfully sent
-                    String str = """
-                            Received new metadata:
-                            Topic: %s
-                            Key: %s
-                            Partition: %s
-                            Offset: %s
-                            Timestamp: %s
-                            """;
-                    log.info(String.format(str, metadata.topic(), producerRecord.key(),
+                    log.info(String.format(STR, metadata.topic(), producerRecord.key(),
                             metadata.partition(), metadata.offset(), metadata.timestamp()));
                 } else {
                     log.error("Error while producing", e);
